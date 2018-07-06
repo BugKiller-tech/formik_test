@@ -1,14 +1,17 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Formik, withFormik, Form, Field } from 'formik';
-import Yup from 'yup';
+import * as Yup from 'yup';
 
 class SignupForm extends Component {
   render() {
     const { 
       values, 
-      handleChange,
-      // handleSubmit
+      // handleChange,
+      // handleSubmit,
+      errors,
+      touched,
+      isSubmitting,
     } = this.props;
 
     return (
@@ -17,10 +20,15 @@ class SignupForm extends Component {
       // <input type="password" name="password" value={values.password} onChange={handleChange} />
       // <button>Submit</button>
       // </form>
-
       <Form>
-        <Field type="email" name="email" />
-        <Field type="password" name="password" />
+        <div>
+          { touched.email && errors.email &&  <p>{errors.email}</p>}
+          <Field type="email" name="email" />
+        </div>
+        <div>
+          { touched.password && errors.password &&  <p>{errors.password}</p>}
+          <Field type="password" name="password" />
+        </div>
         <label htmlFor="">
           <Field type="checkbox" name="newsletter" checked={values.newsletter} />
           Join Our news letter
@@ -30,7 +38,7 @@ class SignupForm extends Component {
           <option value="premium">Premium</option>
         </Field>
 
-        <button>Submit</button>
+        <button type="submit" disabled={ isSubmitting }>Submit</button>
       </Form>
     );
   }
@@ -45,9 +53,24 @@ const FormikSignupForm = withFormik({
       plan: plan || 'free'
     }
   },
+  validationSchema: Yup.object().shape({
+    email: Yup.string().email('This is not valid email').required('Please provide the email'),
+    password: Yup.string().min(6, 'The password must be 9 characters or longer').required(),
+    
+  }),
 
-  handleSubmit(values) {
-    console.log(values);
+  handleSubmit(values, { resetForm, setErrors, setSubmitting }) {
+    // console.log(values);
+    setTimeout(() => {
+      if (values.email === 'test@gmail.com') {
+        setErrors({
+          email: 'This email is already taken!!'
+        })        
+      } else {
+        resetForm();
+      }
+      setSubmitting(false);
+    }, 2000);
   }
 
 })(SignupForm);
